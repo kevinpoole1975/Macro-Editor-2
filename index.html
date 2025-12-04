@@ -1,4 +1,3 @@
-<!-- CHUNK 1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,7 +116,6 @@
                     </div>
                 </div>
             </div>
-<!-- CHUNK 2 -->
 <div class="panel">
                 <h2>🎛️ Input Configuration</h2>
                 <div class="add-input">
@@ -192,7 +190,7 @@
         </div>
     </div>
     <script>
-<!-- CHUNK 3 -->
+
 let macros=[],currentMacroId=null,nextMacroId=1,renamingMacroId=null,inputs={},atemProfile={majorVersion:"2",minorVersion:"1",product:"ATEM Constellation 8K (4K Mode)"};
 const defaultInputs={Black:"Black",Camera1:"Camera 1",Camera2:"Camera 2",Camera3:"Camera 3",Camera4:"Camera 4",Camera5:"Camera 5",Camera6:"Camera 6",Camera17:"Camera 17",Camera20:"Camera 20",Camera22:"Camera 22",Camera23:"Camera 23",Camera25:"Camera 25",Camera26:"Camera 26",Camera27:"Camera 27",Camera28:"Camera 28",Camera35:"Camera 35",Camera38:"Camera 38",Camera39:"Camera 39",MediaPlayer1:"Media Player 1",MediaPlayer2:"Media Player 2",SuperSource:"Super Source",SuperSource2:"Super Source 2",ME1Program:"ME1 Program",ME2Program:"ME2 Program",ME3Program:"ME3 Program",ME4Program:"ME4 Program"};
 let auxNames={};const defaultAuxNames={0:"Aux 0",1:"Aux 1",2:"Aux 2",3:"Aux 3",4:"Aux 4",5:"Aux 5",6:"Aux 6",7:"Aux 7",8:"Aux 8",9:"Aux 9",10:"Aux 10",11:"Aux 11",12:"Aux 12",13:"Aux 13",14:"Aux 14",15:"Aux 15",16:"Aux 16",17:"Aux 17",18:"Aux 18",19:"Aux 19",20:"Aux 20",21:"Aux 21",22:"Aux 22",23:"Aux 23"};
@@ -261,7 +259,7 @@ function addCommand(){const type=document.getElementById("commandType").value;co
 function getCurrentCommands(){if(currentMacroId){return macros.find(m=>m.id===currentMacroId).commands}return tempCommands}
 
 function removeCommand(index){if(currentMacroId){const macro=macros.find(m=>m.id===currentMacroId);macro.commands.splice(index,1);renderCommandList(macro.commands)}else{tempCommands.splice(index,1);renderCommandList(tempCommands)}updateStatus("Removed command")}
-<!-- CHUNK 4 -->
+
 function saveMacro(){const index=parseInt(document.getElementById("macroIndex").value);const name=document.getElementById("macroName").value.trim();const description=document.getElementById("macroDescription").value.trim();if(!name){updateStatus("Please enter a macro name",true);return}if(isNaN(index)||index<0||index>99){updateStatus("Macro index must be between 0 and 99",true);return}const existingMacro=macros.find(m=>m.index===index&&m.id!==currentMacroId);if(existingMacro){updateStatus(`Index ${index} already used by "${existingMacro.name}"`,true);return}if(currentMacroId){const macro=macros.find(m=>m.id===currentMacroId);macro.index=index;macro.name=name;macro.description=description;updateStatus(`Updated macro: ${name}`)}else{const newMacro={id:nextMacroId++,index,name,description,commands:[...tempCommands]};macros.push(newMacro);currentMacroId=newMacro.id;document.getElementById("deleteBtn").style.display="inline-block";updateStatus(`Created macro: ${name}`)}renderMacroList()}
 
 function deleteMacro(){if(!currentMacroId)return;if(confirm("Are you sure you want to delete this macro?")){macros=macros.filter(m=>m.id!==currentMacroId);createNewMacro();updateStatus("Macro deleted")}}

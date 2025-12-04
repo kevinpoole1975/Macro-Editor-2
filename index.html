@@ -284,10 +284,16 @@
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+            width: 100%;
         }
 
         .add-input input {
-            flex-grow: 1;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .add-input .btn-small {
+            flex-shrink: 0;
         }
 
         .modal {
@@ -370,9 +376,7 @@
             <div class="panel">
                 <h2>📋 Macro Library</h2>
                 
-                <div class="macro-list" id="macroList">
-                    <!-- Macros will be populated here -->
-                </div>
+                <div class="macro-list" id="macroList"></div>
                 
                 <button class="btn" onclick="createNewMacro()">➕ New Macro</button>
                 
@@ -421,15 +425,11 @@
                                 <option value="HyperDeckStop">HyperDeck Stop</option>
                                 <option value="MacroSleep">Sleep/Delay</option>
                             </select>
-                            <select id="commandValue">
-                                <!-- Will be populated based on command type -->
-                            </select>
+                            <select id="commandValue"></select>
                             <button class="btn" onclick="addCommand()">Add</button>
                         </div>
                         
-                        <div class="command-list" id="commandList">
-                            <!-- Commands will be populated here -->
-                        </div>
+                        <div class="command-list" id="commandList"></div>
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
@@ -448,9 +448,7 @@
                     <button class="btn btn-small" onclick="addInput()">Add</button>
                 </div>
                 
-                <div class="input-list" id="inputList">
-                    <!-- Inputs will be populated here -->
-                </div>
+                <div class="input-list" id="inputList"></div>
                 
                 <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                     <button class="btn btn-small" onclick="resetToDefaults()">Reset to Defaults</button>
@@ -463,12 +461,9 @@
             </div>
         </div>
 
-        <div class="status-bar" id="statusBar">
-            Ready to create macros
-        </div>
+        <div class="status-bar" id="statusBar">Ready to create macros</div>
     </div>
 
-    <!-- Rename Modal -->
     <div class="modal" id="renameModal">
         <div class="modal-content">
             <h3>Rename Macro</h3>
@@ -483,25 +478,16 @@
         </div>
     </div>
 
-    <!-- Input Templates Modal -->
     <div class="modal" id="inputTemplatesModal">
         <div class="modal-content">
             <h3>Input Templates</h3>
             <p>Choose a template to quickly set up common ATEM configurations:</p>
             
             <div style="margin: 20px 0;">
-                <button class="btn" onclick="loadInputTemplate('constellation8k')" style="width: 100%; margin-bottom: 10px;">
-                    ATEM Constellation 8K (40 inputs)
-                </button>
-                <button class="btn" onclick="loadInputTemplate('mini')" style="width: 100%; margin-bottom: 10px;">
-                    ATEM Mini/Mini Pro (8 inputs)
-                </button>
-                <button class="btn" onclick="loadInputTemplate('television')" style="width: 100%; margin-bottom: 10px;">
-                    ATEM Television Studio (20 inputs)
-                </button>
-                <button class="btn" onclick="loadInputTemplate('production')" style="width: 100%; margin-bottom: 10px;">
-                    ATEM Production Studio (20 inputs)
-                </button>
+                <button class="btn" onclick="loadInputTemplate('constellation8k')" style="width: 100%; margin-bottom: 10px;">ATEM Constellation 8K (40 inputs)</button>
+                <button class="btn" onclick="loadInputTemplate('mini')" style="width: 100%; margin-bottom: 10px;">ATEM Mini/Mini Pro (8 inputs)</button>
+                <button class="btn" onclick="loadInputTemplate('television')" style="width: 100%; margin-bottom: 10px;">ATEM Television Studio (20 inputs)</button>
+                <button class="btn" onclick="loadInputTemplate('production')" style="width: 100%; margin-bottom: 10px;">ATEM Production Studio (20 inputs)</button>
             </div>
             
             <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
@@ -540,7 +526,6 @@
             product: "ATEM Constellation 8K (4K Mode)"
         };
 
-        // Default input mappings
         const defaultInputs = {
             'Black': 'Black',
             'Camera1': 'Camera 1',
@@ -581,7 +566,6 @@
             const list = document.getElementById('macroList');
             list.innerHTML = '';
             
-            // Sort macros by index
             const sortedMacros = [...macros].sort((a, b) => a.index - b.index);
             
             sortedMacros.forEach(macro => {
@@ -603,7 +587,6 @@
                     <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.6;">${macro.commands.length} commands</p>
                 `;
                 
-                // Add drag and drop functionality
                 item.addEventListener('dragstart', handleDragStart);
                 item.addEventListener('dragend', handleDragEnd);
                 item.addEventListener('dragover', handleDragOver);
@@ -667,361 +650,6 @@
             renderInputList();
             updateCommandValueOptions();
             updateStatus('Reset to default inputs');
-        }
-
-        // Drag and drop functionality
-        let draggedMacro = null;
-
-        function handleDragStart(e) {
-            draggedMacro = e.target;
-            e.target.classList.add('dragging');
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedMacro = null;
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            
-            if (!draggedMacro || draggedMacro === e.target) return;
-            
-            const draggedId = parseInt(draggedMacro.dataset.macroId);
-            const targetId = parseInt(e.target.dataset.macroId);
-            
-            const draggedMacroObj = macros.find(m => m.id === draggedId);
-            const targetMacroObj = macros.find(m => m.id === targetId);
-            
-            if (draggedMacroObj && targetMacroObj) {
-                // Swap indices
-                const tempIndex = draggedMacroObj.index;
-                draggedMacroObj.index = targetMacroObj.index;
-                targetMacroObj.index = tempIndex;
-                
-                renderMacroList();
-                updateStatus('Macro order changed');
-            }
-        }
-
-        function selectMacro(id) {
-            currentMacroId = id;
-            const macro = macros.find(m => m.id === id);
-            
-            document.getElementById('macroIndex').value = macro.index;
-            document.getElementById('macroName').value = macro.name;
-            document.getElementById('macroDescription').value = macro.description || '';
-            document.getElementById('deleteBtn').style.display = 'inline-block';
-            
-            renderCommandList(macro.commands);
-            renderMacroList();
-            updateStatus(`Selected macro: ${macro.name}`);
-        }
-
-        function renderCommandList(commands = []) {
-            const list = document.getElementById('commandList');
-            list.innerHTML = '';
-            
-            commands.forEach((command, index) => {
-                const item = document.createElement('div');
-                item.className = 'command-item';
-                
-                item.innerHTML = `
-                    <div class="command-info">
-                        <span class="command-type">${command.type}</span>
-                        ${generateCommandLabel(command)}
-                    </div>
-                    <button class="btn btn-small btn-danger" onclick="removeCommand(${index})">✕</button>
-                `;
-                
-                list.appendChild(item);
-            });
-        }
-
-        function generateCommandLabel(command) {
-            const { type, attributes } = command;
-            
-            switch (type) {
-                case 'PreviewInput':
-                    return `ME${attributes.mixEffectBlockIndex || 0}: Preview → ${inputs[attributes.input] || attributes.input}`;
-                case 'AutoTransition':
-                    return `ME${attributes.mixEffectBlockIndex || 0}: Auto Transition`;
-                case 'CutTransition':
-                    return `ME${attributes.mixEffectBlockIndex || 0}: Cut Transition`;
-                case 'AuxiliaryInput':
-                    return `Aux ${attributes.auxiliaryIndex}: → ${inputs[attributes.input] || attributes.input}`;
-                case 'KeyOnAir':
-                    return `ME${attributes.mixEffectBlockIndex || 0} Key ${attributes.keyIndex}: ${attributes.onAir === 'True' ? 'ON' : 'OFF'}`;
-                case 'DownstreamKeyOnAir':
-                    return `DSK ${attributes.keyIndex}: ${attributes.onAir === 'True' ? 'ON' : 'OFF'}`;
-                case 'DownstreamKeyAuto':
-                    return `DSK ${attributes.keyIndex}: Auto`;
-                case 'TransitionSource':
-                    return `ME${attributes.mixEffectBlockIndex || 0}: Transition → ${attributes.source}`;
-                case 'FlyKeyRunToKeyFrame':
-                    return `ME${attributes.mixEffectBlockIndex || 0} Fly Key ${attributes.keyIndex}: → Frame ${attributes.keyFrameIndex}`;
-                case 'HyperDeckRecord':
-                    return `HyperDeck ${attributes.hyperDeckIndex}: Record`;
-                case 'HyperDeckStop':
-                    return `HyperDeck ${attributes.hyperDeckIndex}: Stop`;
-                case 'MacroSleep':
-                    return `Sleep: ${attributes.frames} frames`;
-                default:
-                    return JSON.stringify(attributes);
-            }
-        }
-
-        function createNewMacro() {
-            currentMacroId = null;
-            
-            // Find next available index
-            const usedIndices = macros.map(m => m.index);
-            let nextIndex = 0;
-            while (usedIndices.includes(nextIndex)) {
-                nextIndex++;
-            }
-            
-            document.getElementById('macroIndex').value = nextIndex;
-            document.getElementById('macroName').value = '';
-            document.getElementById('macroDescription').value = '';
-            document.getElementById('deleteBtn').style.display = 'none';
-            renderCommandList([]);
-            renderMacroList();
-            updateStatus('Creating new macro');
-        }
-
-        function addCommand() {
-            const type = document.getElementById('commandType').value;
-            const valueSelect = document.getElementById('commandValue');
-            const value = valueSelect.value;
-            
-            let attributes = {};
-            
-            switch (type) {
-                case 'PreviewInput':
-                case 'AutoTransition':
-                case 'CutTransition':
-                    attributes.mixEffectBlockIndex = value.split('-')[0] || '0';
-                    if (type === 'PreviewInput') {
-                        attributes.input = value.split('-')[1] || value;
-                    }
-                    break;
-                case 'AuxiliaryInput':
-                    const auxParts = value.split('-');
-                    attributes.auxiliaryIndex = auxParts[0] || '0';
-                    attributes.input = auxParts[1] || 'Black';
-                    break;
-                case 'KeyOnAir':
-                    const keyParts = value.split('-');
-                    attributes.mixEffectBlockIndex = keyParts[0] || '0';
-                    attributes.keyIndex = keyParts[1] || '0';
-                    attributes.onAir = keyParts[2] || 'True';
-                    break;
-                case 'DownstreamKeyOnAir':
-                case 'DownstreamKeyAuto':
-                    attributes.keyIndex = value || '0';
-                    if (type === 'DownstreamKeyOnAir') {
-                        attributes.onAir = 'True';
-                    }
-                    break;
-                case 'TransitionSource':
-                    const transParts = value.split('-');
-                    attributes.mixEffectBlockIndex = transParts[0] || '0';
-                    attributes.source = transParts[1] || 'Background';
-                    break;
-                case 'FlyKeyRunToKeyFrame':
-                    const flyParts = value.split('-');
-                    attributes.mixEffectBlockIndex = flyParts[0] || '0';
-                    attributes.keyIndex = flyParts[1] || '0';
-                    attributes.keyFrameIndex = flyParts[2] || '0';
-                    break;
-                case 'HyperDeckRecord':
-                case 'HyperDeckStop':
-                    attributes.hyperDeckIndex = value || '0';
-                    break;
-                case 'MacroSleep':
-                    attributes.frames = value || '30';
-                    break;
-            }
-            
-            const command = { type, attributes };
-            
-            if (currentMacroId) {
-                const macro = macros.find(m => m.id === currentMacroId);
-                macro.commands.push(command);
-                renderCommandList(macro.commands);
-            } else {
-                const commandList = document.getElementById('commandList');
-                const commands = getCurrentCommands();
-                commands.push(command);
-                renderCommandList(commands);
-            }
-            
-            updateStatus(`Added ${type} command`);
-        }
-
-        function getCurrentCommands() {
-            const commandList = document.getElementById('commandList');
-            const commands = [];
-            
-            Array.from(commandList.children).forEach(item => {
-                // This is a simplified approach - in a real implementation,
-                // you'd want to store the actual command data
-                const typeSpan = item.querySelector('.command-type');
-                const type = typeSpan.textContent;
-                commands.push({ type, attributes: {} }); // Simplified
-            });
-            
-            return commands;
-        }
-
-        function removeCommand(index) {
-            if (currentMacroId) {
-                const macro = macros.find(m => m.id === currentMacroId);
-                macro.commands.splice(index, 1);
-                renderCommandList(macro.commands);
-            } else {
-                const commandList = document.getElementById('commandList');
-                commandList.children[index].remove();
-            }
-            updateStatus('Removed command');
-        }
-
-        function saveMacro() {
-            const index = parseInt(document.getElementById('macroIndex').value);
-            const name = document.getElementById('macroName').value.trim();
-            const description = document.getElementById('macroDescription').value.trim();
-            
-            if (!name) {
-                updateStatus('Please enter a macro name', true);
-                return;
-            }
-            
-            if (isNaN(index) || index < 0 || index > 99) {
-                updateStatus('Macro index must be between 0 and 99', true);
-                return;
-            }
-            
-            // Check if index is already used by another macro
-            const existingMacro = macros.find(m => m.index === index && m.id !== currentMacroId);
-            if (existingMacro) {
-                updateStatus(`Index ${index} already used by "${existingMacro.name}"`, true);
-                return;
-            }
-            
-            const commands = currentMacroId ? 
-                macros.find(m => m.id === currentMacroId).commands : 
-                getCurrentCommands();
-            
-            if (currentMacroId) {
-                // Update existing macro
-                const macro = macros.find(m => m.id === currentMacroId);
-                macro.index = index;
-                macro.name = name;
-                macro.description = description;
-                macro.commands = commands;
-                updateStatus(`Updated macro: ${name}`);
-            } else {
-                // Create new macro
-                const newMacro = {
-                    id: nextMacroId++,
-                    index,
-                    name,
-                    description,
-                    commands
-                };
-                macros.push(newMacro);
-                currentMacroId = newMacro.id;
-                document.getElementById('deleteBtn').style.display = 'inline-block';
-                updateStatus(`Created macro: ${name}`);
-            }
-            
-            renderMacroList();
-        }
-
-        function deleteMacro() {
-            if (!currentMacroId) return;
-            
-            if (confirm('Are you sure you want to delete this macro?')) {
-                macros = macros.filter(m => m.id !== currentMacroId);
-                createNewMacro();
-                updateStatus('Macro deleted');
-            }
-        }
-
-        function deleteMacroFromList(id) {
-            if (confirm('Are you sure you want to delete this macro?')) {
-                macros = macros.filter(m => m.id !== id);
-                if (currentMacroId === id) {
-                    createNewMacro();
-                }
-                renderMacroList();
-                updateStatus('Macro deleted');
-            }
-        }
-
-        function duplicateMacro(id) {
-            const macro = macros.find(m => m.id === id);
-            
-            // Find next available index
-            const usedIndices = macros.map(m => m.index);
-            let nextIndex = macro.index + 1;
-            while (usedIndices.includes(nextIndex) && nextIndex <= 99) {
-                nextIndex++;
-            }
-            
-            if (nextIndex > 99) {
-                nextIndex = 0;
-                while (usedIndices.includes(nextIndex) && nextIndex <= 99) {
-                    nextIndex++;
-                }
-            }
-            
-            if (nextIndex > 99) {
-                updateStatus('No available macro slots', true);
-                return;
-            }
-            
-            const newMacro = {
-                ...macro,
-                id: nextMacroId++,
-                index: nextIndex,
-                name: macro.name + ' (Copy)',
-                commands: JSON.parse(JSON.stringify(macro.commands))
-            };
-            macros.push(newMacro);
-            renderMacroList();
-            updateStatus(`Duplicated macro: ${macro.name}`);
-        }
-
-        function renameMacro(id) {
-            renamingMacroId = id;
-            const macro = macros.find(m => m.id === id);
-            document.getElementById('newMacroName').value = macro.name;
-            document.getElementById('renameModal').style.display = 'flex';
-        }
-
-        function confirmRename() {
-            const newName = document.getElementById('newMacroName').value.trim();
-            if (!newName) {
-                updateStatus('Please enter a name', true);
-                return;
-            }
-            
-            const macro = macros.find(m => m.id === renamingMacroId);
-            macro.name = newName;
-            
-            if (currentMacroId === renamingMacroId) {
-                document.getElementById('macroName').value = newName;
-            }
-            
-            renderMacroList();
-            closeModal();
-            updateStatus(`Renamed macro to: ${newName}`);
         }
 
         function importInputs() {
@@ -1193,529 +821,3 @@
                         'MediaPlayer2': 'Media Player 2'
                     };
                     break;
-                    
-                case 'television':
-                    templateInputs = {
-                        'Black': 'Black',
-                        'Camera1': 'SDI 1',
-                        'Camera2': 'SDI 2',
-                        'Camera3': 'SDI 3',
-                        'Camera4': 'SDI 4',
-                        'Camera5': 'SDI 5',
-                        'Camera6': 'SDI 6',
-                        'Camera7': 'SDI 7',
-                        'Camera8': 'SDI 8',
-                        'Camera9': 'HDMI 1',
-                        'Camera10': 'HDMI 2',
-                        'Camera11': 'HDMI 3',
-                        'Camera12': 'HDMI 4',
-                        'Camera13': 'Component',
-                        'Camera14': 'Composite',
-                        'Camera15': 'S-Video',
-                        'Camera16': 'Internal 1',
-                        'Camera17': 'Internal 2',
-                        'Camera18': 'Internal 3',
-                        'Camera19': 'Internal 4',
-                        'Camera20': 'Internal 5',
-                        'MediaPlayer1': 'Media Player 1',
-                        'MediaPlayer2': 'Media Player 2'
-                    };
-                    break;
-                    
-                case 'production':
-                    templateInputs = {
-                        'Black': 'Black',
-                        'Camera1': 'SDI 1',
-                        'Camera2': 'SDI 2',
-                        'Camera3': 'SDI 3',
-                        'Camera4': 'SDI 4',
-                        'Camera5': 'SDI 5',
-                        'Camera6': 'SDI 6',
-                        'Camera7': 'SDI 7',
-                        'Camera8': 'SDI 8',
-                        'Camera9': 'SDI 9',
-                        'Camera10': 'SDI 10',
-                        'Camera11': 'SDI 11',
-                        'Camera12': 'SDI 12',
-                        'Camera13': 'SDI 13',
-                        'Camera14': 'SDI 14',
-                        'Camera15': 'SDI 15',
-                        'Camera16': 'SDI 16',
-                        'Camera17': 'SDI 17',
-                        'Camera18': 'SDI 18',
-                        'Camera19': 'SDI 19',
-                        'Camera20': 'SDI 20',
-                        'MediaPlayer1': 'Media Player 1',
-                        'MediaPlayer2': 'Media Player 2',
-                        'SuperSource': 'Super Source'
-                    };
-                    break;
-            }
-            
-            inputs = { ...inputs, ...templateInputs };
-            renderInputList();
-            updateCommandValueOptions();
-            closeInputTemplatesModal();
-            updateStatus(`Loaded ${Object.keys(templateInputs).length} inputs from ${templateType} template`);
-        }
-
-        function showTextModal(title, content) {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.8); z-index: 2000; display: flex;
-                justify-content: center; align-items: center;
-            `;
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: #2d2d2d; padding: 30px; border-radius: 12px;
-                max-width: 80%; max-height: 80%; overflow: auto;
-                color: white;
-            `;
-            
-            modalContent.innerHTML = `
-                <h3 style="color: #ff6b35; margin-bottom: 20px;">${title}</h3>
-                <textarea readonly style="
-                    width: 100%; height: 300px; background: #1e1e1e; color: white;
-                    border: 1px solid #ff6b35; border-radius: 6px; padding: 10px;
-                    font-family: monospace; font-size: 12px;
-                ">${content}</textarea>
-                <div style="margin-top: 15px; text-align: right;">
-                    <button onclick="copyToClipboard(this)" style="
-                        background: linear-gradient(135deg, #ff6b35, #f7931e);
-                        color: white; border: none; padding: 10px 20px;
-                        border-radius: 6px; cursor: pointer; margin-right: 10px;
-                    ">Copy to Clipboard</button>
-                    <button onclick="this.closest('.modal-temp').remove()" style="
-                        background: linear-gradient(135deg, #e74c3c, #c0392b);
-                        color: white; border: none; padding: 10px 20px;
-                        border-radius: 6px; cursor: pointer;
-                    ">Close</button>
-                </div>
-            `;
-            
-            modal.className = 'modal-temp';
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            
-            const textarea = modalContent.querySelector('textarea');
-            textarea.focus();
-            textarea.select();
-        }
-
-        function exportMacrosXML() {
-            const xml = generateATEMXML();
-            
-            try {
-                // Try the standard blob method first
-                const blob = new Blob([xml], { type: 'text/plain' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'atem_macros.xml';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                updateStatus('Macros exported as XML');
-            } catch (error) {
-                // Fallback: show XML in a modal for copy/paste
-                showXMLModal(xml);
-            }
-        }
-
-        function showXMLModal(xml) {
-            // Create modal for XML display
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.8); z-index: 2000; display: flex;
-                justify-content: center; align-items: center;
-            `;
-            
-            const content = document.createElement('div');
-            content.style.cssText = `
-                background: #2d2d2d; padding: 30px; border-radius: 12px;
-                max-width: 80%; max-height: 80%; overflow: auto;
-                color: white;
-            `;
-            
-            content.innerHTML = `
-                <h3 style="color: #ff6b35; margin-bottom: 20px;">Export XML - Copy the content below:</h3>
-                <textarea readonly style="
-                    width: 100%; height: 400px; background: #1e1e1e; color: white;
-                    border: 1px solid #ff6b35; border-radius: 6px; padding: 10px;
-                    font-family: monospace; font-size: 12px;
-                ">${xml}</textarea>
-                <div style="margin-top: 15px; text-align: right;">
-                    <button onclick="copyToClipboard(this)" style="
-                        background: linear-gradient(135deg, #ff6b35, #f7931e);
-                        color: white; border: none; padding: 10px 20px;
-                        border-radius: 6px; cursor: pointer; margin-right: 10px;
-                    ">Copy to Clipboard</button>
-                    <button onclick="this.closest('.modal-temp').remove()" style="
-                        background: linear-gradient(135deg, #e74c3c, #c0392b);
-                        color: white; border: none; padding: 10px 20px;
-                        border-radius: 6px; cursor: pointer;
-                    ">Close</button>
-                </div>
-            `;
-            
-            modal.className = 'modal-temp';
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-            
-            // Select all text in textarea
-            const textarea = content.querySelector('textarea');
-            textarea.focus();
-            textarea.select();
-            
-            updateStatus('XML ready for copy - download blocked by browser');
-        }
-
-        function copyToClipboard(button) {
-            const textarea = button.closest('div').previousElementSibling;
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                button.textContent = 'Copied!';
-                setTimeout(() => {
-                    button.textContent = 'Copy to Clipboard';
-                }, 2000);
-            } catch (err) {
-                updateStatus('Please manually copy the XML content', true);
-            }
-        }
-
-        function exportMacrosJSON() {
-            const exportData = {
-                macros,
-                inputs,
-                atemProfile
-            };
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'atem_macros.json';
-            link.click();
-            
-            updateStatus('Macros exported as JSON');
-        }
-
-        function generateATEMXML() {
-            let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-            xml += `<Profile majorVersion="${atemProfile.majorVersion}" minorVersion="${atemProfile.minorVersion}" product="${atemProfile.product}">\n`;
-            xml += `    <MacroPool>\n`;
-            
-            // Sort macros by index
-            const sortedMacros = [...macros].sort((a, b) => a.index - b.index);
-            
-            sortedMacros.forEach(macro => {
-                xml += `        <Macro index="${macro.index}" name="${escapeXML(macro.name)}" description="${escapeXML(macro.description || '')}">\n`;
-                
-                macro.commands.forEach(command => {
-                    xml += `            <Op id="${command.type}"`;
-                    
-                    Object.entries(command.attributes).forEach(([key, value]) => {
-                        xml += ` ${key}="${escapeXML(value)}"`;
-                    });
-                    
-                    xml += `/>\n`;
-                });
-                
-                xml += `        </Macro>\n`;
-            });
-            
-            xml += `    </MacroPool>\n`;
-            xml += `    <MacroControl loop="False"/>\n`;
-            xml += `</Profile>`;
-            
-            return xml;
-        }
-
-        function escapeXML(str) {
-            return str.toString()
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function importMacrosXML() {
-            document.getElementById('importFile').accept = '.xml';
-            document.getElementById('importFile').click();
-        }
-
-        function importMacrosJSON() {
-            document.getElementById('importFile').accept = '.json';
-            document.getElementById('importFile').click();
-        }
-
-        function handleImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    if (file.name.endsWith('.xml')) {
-                        parseATEMXML(e.target.result);
-                    } else if (file.name.endsWith('.json')) {
-                        parseATEMJSON(e.target.result);
-                    }
-                } catch (error) {
-                    updateStatus('Error importing file: ' + error.message, true);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function parseATEMXML(xmlString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xmlString, 'text/xml');
-            
-            // Check for parsing errors
-            const parseError = doc.querySelector('parsererror');
-            if (parseError) {
-                throw new Error('Invalid XML format');
-            }
-            
-            // Extract profile information
-            const profile = doc.querySelector('Profile');
-            if (profile) {
-                atemProfile.majorVersion = profile.getAttribute('majorVersion') || '2';
-                atemProfile.minorVersion = profile.getAttribute('minorVersion') || '1';
-                atemProfile.product = profile.getAttribute('product') || 'ATEM Constellation 8K (4K Mode)';
-            }
-            
-            // Extract macros
-            const macroElements = doc.querySelectorAll('Macro');
-            const importedMacros = [];
-            
-            macroElements.forEach(macroEl => {
-                const index = parseInt(macroEl.getAttribute('index')) || 0;
-                const name = macroEl.getAttribute('name') || '';
-                const description = macroEl.getAttribute('description') || '';
-                
-                const commands = [];
-                const opElements = macroEl.querySelectorAll('Op');
-                
-                opElements.forEach(opEl => {
-                    const type = opEl.getAttribute('id');
-                    const attributes = {};
-                    
-                    // Get all attributes except 'id'
-                    Array.from(opEl.attributes).forEach(attr => {
-                        if (attr.name !== 'id') {
-                            attributes[attr.name] = attr.value;
-                        }
-                    });
-                    
-                    commands.push({ type, attributes });
-                });
-                
-                importedMacros.push({
-                    id: nextMacroId++,
-                    index,
-                    name,
-                    description,
-                    commands
-                });
-            });
-            
-            // Merge with existing macros (replace if same index)
-            importedMacros.forEach(importedMacro => {
-                const existingIndex = macros.findIndex(m => m.index === importedMacro.index);
-                if (existingIndex !== -1) {
-                    macros[existingIndex] = importedMacro;
-                } else {
-                    macros.push(importedMacro);
-                }
-            });
-            
-            renderMacroList();
-            updateStatus(`Imported ${importedMacros.length} macros from XML`);
-        }
-
-        function parseATEMJSON(jsonString) {
-            const data = JSON.parse(jsonString);
-            
-            if (data.macros) {
-                const importedMacros = data.macros;
-                
-                // Update nextMacroId to avoid conflicts
-                const maxId = Math.max(...macros.concat(importedMacros).map(m => m.id), 0);
-                nextMacroId = maxId + 1;
-                
-                // Merge macros
-                importedMacros.forEach(importedMacro => {
-                    const existingIndex = macros.findIndex(m => m.index === importedMacro.index);
-                    if (existingIndex !== -1) {
-                        macros[existingIndex] = importedMacro;
-                    } else {
-                        macros.push(importedMacro);
-                    }
-                });
-            }
-            
-            if (data.inputs) {
-                inputs = { ...inputs, ...data.inputs };
-                renderInputList();
-                updateCommandValueOptions();
-            }
-            
-            if (data.atemProfile) {
-                atemProfile = { ...atemProfile, ...data.atemProfile };
-            }
-            
-            renderMacroList();
-            updateStatus(`Imported ${data.macros?.length || 0} macros from JSON`);
-        }
-
-        function updateCommandValueOptions() {
-            const commandType = document.getElementById('commandType').value;
-            const valueSelect = document.getElementById('commandValue');
-            
-            valueSelect.innerHTML = '';
-            
-            switch (commandType) {
-                case 'PreviewInput':
-                    // ME blocks with inputs
-                    for (let me = 0; me < 4; me++) {
-                        Object.entries(inputs).forEach(([id, name]) => {
-                            const option = document.createElement('option');
-                            option.value = `${me}-${id}`;
-                            option.textContent = `ME${me}: ${name}`;
-                            valueSelect.appendChild(option);
-                        });
-                    }
-                    break;
-                    
-                case 'AutoTransition':
-                case 'CutTransition':
-                    // ME blocks only
-                    for (let me = 0; me < 4; me++) {
-                        const option = document.createElement('option');
-                        option.value = me.toString();
-                        option.textContent = `ME${me}`;
-                        valueSelect.appendChild(option);
-                    }
-                    break;
-                    
-                case 'AuxiliaryInput':
-                    // Aux outputs with inputs
-                    for (let aux = 0; aux < 24; aux++) {
-                        Object.entries(inputs).forEach(([id, name]) => {
-                            const option = document.createElement('option');
-                            option.value = `${aux}-${id}`;
-                            option.textContent = `Aux ${aux}: ${name}`;
-                            valueSelect.appendChild(option);
-                        });
-                    }
-                    break;
-                    
-                case 'KeyOnAir':
-                    // ME blocks with keys and on/off state
-                    for (let me = 0; me < 4; me++) {
-                        for (let key = 0; key < 4; key++) {
-                            ['True', 'False'].forEach(state => {
-                                const option = document.createElement('option');
-                                option.value = `${me}-${key}-${state}`;
-                                option.textContent = `ME${me} Key${key}: ${state === 'True' ? 'ON' : 'OFF'}`;
-                                valueSelect.appendChild(option);
-                            });
-                        }
-                    }
-                    break;
-                    
-                case 'DownstreamKeyOnAir':
-                case 'DownstreamKeyAuto':
-                    // DSK keys
-                    for (let dsk = 0; dsk < 4; dsk++) {
-                        const option = document.createElement('option');
-                        option.value = dsk.toString();
-                        option.textContent = `DSK ${dsk}`;
-                        valueSelect.appendChild(option);
-                    }
-                    break;
-                    
-                case 'TransitionSource':
-                    // ME blocks with transition sources
-                    for (let me = 0; me < 4; me++) {
-                        ['Background', 'Key1', 'Key2', 'Key3', 'Key4', 'Background, Key1', 'Background, Key2'].forEach(source => {
-                            const option = document.createElement('option');
-                            option.value = `${me}-${source}`;
-                            option.textContent = `ME${me}: ${source}`;
-                            valueSelect.appendChild(option);
-                        });
-                    }
-                    break;
-                    
-                case 'FlyKeyRunToKeyFrame':
-                    // ME blocks with fly keys and keyframes
-                    for (let me = 0; me < 4; me++) {
-                        for (let key = 0; key < 4; key++) {
-                            for (let frame = 0; frame < 2; frame++) {
-                                const option = document.createElement('option');
-                                option.value = `${me}-${key}-${frame}`;
-                                option.textContent = `ME${me} Key${key}: Frame ${frame}`;
-                                valueSelect.appendChild(option);
-                            }
-                        }
-                    }
-                    break;
-                    
-                case 'HyperDeckRecord':
-                case 'HyperDeckStop':
-                    // HyperDeck indices
-                    for (let hd = 0; hd < 4; hd++) {
-                        const option = document.createElement('option');
-                        option.value = hd.toString();
-                        option.textContent = `HyperDeck ${hd}`;
-                        valueSelect.appendChild(option);
-                    }
-                    break;
-                    
-                case 'MacroSleep':
-                    // Frame counts
-                    ['1', '15', '30', '60', '90', '150', '300'].forEach(frames => {
-                        const option = document.createElement('option');
-                        option.value = frames;
-                        option.textContent = `${frames} frames (${Math.round(frames/30*1000)}ms)`;
-                        valueSelect.appendChild(option);
-                    });
-                    break;
-            }
-        }
-
-        function updateStatus(message, isError = false) {
-            const statusBar = document.getElementById('statusBar');
-            statusBar.textContent = message;
-            statusBar.style.background = isError ? 
-                'rgba(231, 76, 60, 0.2)' : 
-                'rgba(255, 107, 53, 0.2)';
-            
-            setTimeout(() => {
-                statusBar.style.background = 'rgba(255, 255, 255, 0.1)';
-            }, 3000);
-        }
-
-        // Event listeners
-        document.getElementById('commandType').addEventListener('change', updateCommandValueOptions);
-
-        // Close modal when clicking outside
-        document.getElementById('renameModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Initialize the app
-        initializeApp();
-    </script>
-</body>
-</html>
